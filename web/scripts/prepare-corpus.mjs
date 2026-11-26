@@ -3,15 +3,11 @@ import { resolve } from 'node:path'
 import { Converter } from 'opencc-js'
 
 const web = resolve(import.meta.dirname, '..')
-const assets = resolve(web, '../app/src/main/assets')
-const read = file => readFileSync(resolve(assets, file), 'utf8')
+const data = resolve(web, 'data')
+const read = file => readFileSync(resolve(data, file), 'utf8')
 const json = file => JSON.parse(read(file))
 const traditionalize = Converter({ from: 'cn', to: 't' })
 const simplify = Converter({ from: 't', to: 'cn' })
-const classics = json('classics/manifest.json')
-const analects = json('analects/manifest.json')
-const dao = classics.works.find(entry => entry.id === 'tao_te_ching')
-const daoSource = classics.sources.find(entry => entry.file === 'banghuazhao-道德经_json.json')
 const readAnnotations = filename => JSON.parse(readFileSync(resolve(web, 'scripts', filename), 'utf8'))
 const annotations = {
   ...readAnnotations('analects-annotations.json'),
@@ -19,29 +15,13 @@ const annotations = {
 }
 const remainingAnnotations = new Set(Object.keys(annotations))
 const annotationTypes = new Set(['典故', '古注', '出处与语境'])
-const definitions = [
-  {
-    id: 'analects', title: '论语', book: 68, verses: 512, verseCounts: analects.verseCounts,
-    chapterNames: json('analects/lunyu.json').map(chapter => chapter.chapter),
-    source: { name: analects.source, revision: analects.revision, url: analects.url, license: analects.license, notice: read('chinese-poetry-LICENSE.txt') },
-  },
-  {
-    ...dao,
-    source: {
-      name: daoSource.repository.split('/').slice(-2).join('/'),
-      revision: daoSource.revision,
-      url: `${daoSource.repository}/tree/${daoSource.revision}`,
-      license: daoSource.license,
-      notice: read('banghuazhao-LICENSE.txt'),
-    },
-  },
-]
+const definitions = json('catalog.json')
 
 const books = definitions.map(({ id, title, book, verses, verseCounts, chapterNames, source }) => {
   const chapters = chapterNames.map((name, index) => ({
     number: index + 1, name, traditional: traditionalize(name), sections: [],
   }))
-  const rows = read(`bibles/${id}.tsv`).trimEnd().split(/\r?\n/)
+  const rows = read(`texts/${id}.tsv`).trimEnd().split(/\r?\n/)
   if (rows.length !== verses) throw new Error(`Incomplete work: ${id}`)
   for (const row of rows) {
     const [bookNumber, chapterNumber, sectionNumber, original] = row.split('\t')
@@ -69,7 +49,11 @@ const books = definitions.map(({ id, title, book, verses, verseCounts, chapterNa
       chapters.some((chapter, index) => chapter.sections.length !== verseCounts[index])) {
     throw new Error(`Incomplete chapter: ${id}`)
   }
-  return { id, title, traditional: traditionalize(title), source, verses, chapters }
+  const { noticeFile, ...provenance } = source
+  return {
+    id, title, traditional: traditionalize(title), source: { ...provenance, notice: read(noticeFile) },
+    verses, chapters,
+  }
 })
 
 if (remainingAnnotations.size) throw new Error(`Unknown annotation keys: ${[...remainingAnnotations]}`)

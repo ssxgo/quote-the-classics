@@ -28,7 +28,7 @@ test('both books retain all 593 original passages and have complete sourced anno
     ['analects', 20, 512], ['tao_te_ching', 81, 81],
   ])
   for (const book of corpus) {
-    const source = new URL(`../../app/src/main/assets/bibles/${book.id}.tsv`, import.meta.url)
+    const source = new URL(`../data/texts/${book.id}.tsv`, import.meta.url)
     const rows = readFileSync(source, 'utf8').trimEnd().split(/\r?\n/).map(row => row.split('\t'))
     const sections = book.chapters.flatMap(chapter => chapter.sections)
     assert.ok(book.chapters.every(chapter => chapter.sections.length > 0))

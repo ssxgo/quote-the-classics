@@ -18,11 +18,13 @@ uv run --locked uvicorn server:app --host 127.0.0.1 --port 8000
 
 打开 [本地阅读器](http://127.0.0.1:8000)。若电脑没有上述路径，可用 `uv sync --locked --python 3.12`。uv 会在 `web/.venv` 安装依赖；安装结束后，阅读和检索均在本机完成。
 
-开发时在第一个 PowerShell 执行 `$env:YANJING_WEB_DEV='1'`，再运行 `uv run --locked uvicorn server:app --host 127.0.0.1 --port 8000`。在另一个终端运行 `pnpm dev` 并打开 Vite 打印的地址。Vite 会将 API 请求代理给本机 Python 服务。
+开发时在第一个 PowerShell 执行 `$env:CLASSICS_WEB_DEV='1'`，再运行 `uv run --locked uvicorn server:app --host 127.0.0.1 --port 8000`。在另一个终端运行 `pnpm dev` 并打开 Vite 打印的地址。Vite 会将 API 请求代理给本机 Python 服务。
 
 ## 数据与验证
 
 `pnpm corpus` 将仓库正文和两书的注解合并为网页数据。繁简转换用于字形展示，章段编号沿用数字底本。`pnpm index` 沿用仓库的 BGE 模型，分别对原文和白话资料（本页释义、原有检索提示）生成索引。缓存保存在 `.index/`，数据或模型变动后会重新生成。搜索优先纳入原文匹配，再按相关性补足最多 8 条候选。列表按输入与原文最相近分片的余弦相似度降序排列。语义检索不可用时，网页仍可按原文字词匹配。
+
+两书正文、检索资料和模型放在 [data](data)。正文底本信息见 [catalog.json](data/catalog.json)，语义模型采用固定修订的 Xenova 量化版，繁简字形使用 OpenCC.js。第三方许可证见 [data/licenses](data/licenses)。[BGE 原版](https://huggingface.co/BAAI/bge-small-zh-v1.5) · [Xenova 量化版](https://huggingface.co/Xenova/bge-small-zh-v1.5/tree/75c43b069aac4d136ba6bc1122f995fedcfd2781) · [OpenCC.js](https://github.com/nk2028/opencc-js)
 
 「版本与来源」列有正文版本和许可证。页面使用大都会艺术博物馆公版藏品 [《夏山图》](https://www.metmuseum.org/art/collection/search/39915)，版式参考 [「皕宋——故宫宋版图书观止」](https://theme.npm.edu.tw/exh114/TwoHundredTreasures/)。
 

@@ -5,11 +5,11 @@ from server import Search
 
 
 class SearchTest(unittest.TestCase):
-    def test_tokenizer_matches_android_fixtures(self):
+    def test_tokenizer_matches_reference_fixtures(self):
         import json
-        from server import ROOT
+        from search_vectors import WEB
 
-        path = ROOT / 'app/src/test/resources/tokenizer-fixtures.json'
+        path = WEB / 'test/tokenizer-fixtures.json'
         for fixture in json.loads(path.read_text(encoding='utf-8')):
             self.assertEqual(encode_tokens(fixture['text']).ids, fixture['ids'])
 

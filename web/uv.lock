@@ -407,7 +407,7 @@ wheels = [
 ]
 
 [[package]]
-name = "yanjing-classics-web"
+name = "quote-the-classics"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

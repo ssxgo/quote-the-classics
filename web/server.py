@@ -2,7 +2,6 @@ import json
 import logging
 import mimetypes
 import os
-import sys
 import unicodedata
 from functools import cache
 from typing import Annotated, Literal
@@ -11,10 +10,8 @@ import numpy as np
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.staticfiles import StaticFiles
 
-from search_vectors import ASSETS, INDEX, ROOT, WEB, WORKS, embed, index_fingerprint, read_index
-
-sys.path.insert(0, str(ROOT))
-from scripts.ranking_reference import Ranker
+from ranking import Ranker, character_mapping
+from search_vectors import INDEX, TEXTS, WEB, WORKS, embed, index_fingerprint, read_index
 
 WorkFilter = Literal['all', 'analects', 'tao_te_ching']
 LOGGER = logging.getLogger(__name__)
@@ -22,7 +19,7 @@ LOGGER = logging.getLogger(__name__)
 
 @cache
 def documents(work):
-    rows = (ASSETS / f'bibles/{work}.tsv').read_text(encoding='utf-8').splitlines()
+    rows = (TEXTS / f'{work}.tsv').read_text(encoding='utf-8').splitlines()
     passages = {}
     for row in rows:
         fields = row.split('\t')
@@ -38,8 +35,7 @@ def ranker(work):
 
 @cache
 def character_map():
-    rows = (ASSETS / 't2s.tsv').read_text(encoding='utf-8').splitlines()
-    return str.maketrans(dict(row.split('\t') for row in rows if row))
+    return str.maketrans(character_mapping())
 
 
 def section_scores(index, vector):
@@ -84,7 +80,7 @@ class Search:
                 candidates = [{'key': key, 'cosine': max(score, meaning[key])} for key, score in original.items()]
                 semantic.extend(
                     (match['score'], book, match['key'])
-                    for match in ranker(book).rank(raw, candidates, limit=8, filter_relevance=False)
+                    for match in ranker(book).rank(raw, candidates, limit=8)
                 )
         except Exception:
             LOGGER.warning('Semantic search unavailable', exc_info=True)
@@ -117,7 +113,7 @@ class Search:
 
 
 DIST = WEB / 'dist'
-PRODUCTION = os.getenv('YANJING_WEB_DEV') != '1' and (DIST / 'index.html').is_file()
+PRODUCTION = os.getenv('CLASSICS_WEB_DEV', os.getenv('YANJING_WEB_DEV')) != '1' and (DIST / 'index.html').is_file()
 
 
 def corpus_path():

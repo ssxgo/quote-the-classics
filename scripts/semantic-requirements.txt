@@ -1,3 +1,0 @@
-numpy==2.3.4
-onnxruntime==1.25.1
-tokenizers==0.22.1

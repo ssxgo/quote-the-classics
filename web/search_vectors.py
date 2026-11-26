@@ -15,12 +15,11 @@ from tokenizers.pre_tokenizers import BertPreTokenizer
 from tokenizers.processors import BertProcessing
 
 WEB = Path(__file__).resolve().parent
-ROOT = WEB.parent
-ASSETS = ROOT / 'app/src/main/assets'
-SEMANTIC = ASSETS / 'semantic'
+DATA = WEB / 'data'
+TEXTS = DATA / 'texts'
 INDEX = WEB / '.index/search.npz'
-MODEL = SEMANTIC / 'bge-small-zh-int8.onnx'
-VOCAB = SEMANTIC / 'vocab.txt'
+MODEL = DATA / 'model/bge-small-zh-int8.onnx'
+VOCAB = DATA / 'model/vocab.txt'
 WORKS = ('analects', 'tao_te_ching')
 BOOK_CODES = {'analects': 68, 'tao_te_ching': 74}
 PREFIX = '为这个句子生成表示以用于检索相关文章：'
@@ -88,13 +87,13 @@ def index_fingerprint(corpus_bytes):
         for section in chapter['sections']
     ]
     digest.update(hashlib.sha256(json.dumps(passages, ensure_ascii=False).encode('utf-8')).digest())
-    for source in (MODEL, VOCAB, *(ASSETS / f'bibles/{work}.tsv' for work in WORKS)):
+    for source in (MODEL, VOCAB, *(TEXTS / f'{work}.tsv' for work in WORKS)):
         digest.update(hashlib.sha256(source.read_bytes()).digest())
     return digest.hexdigest()
 
 
 def existing_hints(work):
-    rows = (ASSETS / f'bibles/{work}.tsv').read_text(encoding='utf-8').splitlines()
+    rows = (TEXTS / f'{work}.tsv').read_text(encoding='utf-8').splitlines()
     hints = {}
     for row in rows:
         fields = row.split('\t', 5)
