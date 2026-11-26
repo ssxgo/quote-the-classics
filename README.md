@@ -9,3 +9,7 @@
 3. 等待脚本准备环境并打开 [本机网页](http://127.0.0.1:8000/)。按 `Ctrl+C` 停止服务。
 
 [手动启动与开发说明](web/README.md)
+
+## 致谢
+
+本课程大作业的构思受到 [言经（YanJing）项目](https://github.com/KiRenk0/yanjing-bible) 启发，感谢原作者的开源分享。
