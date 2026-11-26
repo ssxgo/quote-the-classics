@@ -75,11 +75,13 @@ class Ranker:
         weighted=sorted(((key,self.evidence(query,key)) for key in possible),key=lambda p:(-p[1],p[0]))
         return [key for key,score in weighted[:limit] if score>=0.1]
 
-    def rank(self,raw,candidates,limit=60):
+    def rank(self,raw,candidates,limit=60,*,filter_relevance=True):
         query=self.query(raw)
         # Bound lexical influence so explicit wording cannot overpower a strong semantic match.
         scored=[dict(c,score=c['cosine']+0.5*self.evidence(query,c['key'])) for c in candidates if c['key'] in self.docs]
         scored.sort(key=lambda c:(-c['score'],c['key']))
+        if not filter_relevance:
+            return scored[:limit]
         if not scored: return []
         best=scored[0]['score']
         return [c for c in scored if c['cosine']>=0.42 and c['score']>=max(0.5,best-0.15)][:limit]

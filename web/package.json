@@ -1,0 +1,14 @@
+{
+  "name": "yanjing-classics-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "corpus": "node scripts/prepare-corpus.mjs",
+    "index": "uv run --locked python -m search_vectors",
+    "dev": "pnpm corpus && pnpm index && vite --host 127.0.0.1",
+    "build": "pnpm corpus && pnpm index && vite build",
+    "test": "pnpm corpus && node --test"
+  },
+  "dependencies": { "vue": "^3.5.0" },
+  "devDependencies": { "@vitejs/plugin-vue": "^6.0.0", "opencc-js": "1.0.5", "vite": "^7.0.0" }
+}
